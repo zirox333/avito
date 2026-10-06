@@ -1,0 +1,186 @@
+<title>Авто до миллиона</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Unbounded:wght@500;700&display=swap">
+<style>
+/* Layout: summary strip on top, sticky filter bar, then one list of listing rows (spec block left, price + market gauge right). */
+:root{
+  --bg:#f3f4f1; --surface:#ffffff; --ink:#1d2321; --muted:#68716d; --line:#dfe2dc;
+  --accent:#2f6b4f; --accent-soft:#e3efe7;
+  --good:#1f7a4a; --good-soft:#dcf0e3; --great:#0e5c8c; --great-soft:#dcebf6;
+  --warn:#9a5b00; --warn-soft:#fbecd2; --bad:#a3312a; --bad-soft:#f8dfdc;
+  --gauge:#e7e9e4;
+  --f-display:"Unbounded", "Golos Text", system-ui, sans-serif;
+  --f-body:"Golos Text", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141816; --surface:#1c211f; --ink:#e6ebe7; --muted:#9aa49f; --line:#2c3330;
+  --accent:#7cc39c; --accent-soft:#233a2e;
+  --good:#7fd3a3; --good-soft:#1f3a2b; --great:#8cc6ef; --great-soft:#1b3242;
+  --warn:#f0b75e; --warn-soft:#3b2d14; --bad:#f19a92; --bad-soft:#40211e; --gauge:#2a312e; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141816; --surface:#1c211f; --ink:#e6ebe7; --muted:#9aa49f; --line:#2c3330;
+  --accent:#7cc39c; --accent-soft:#233a2e;
+  --good:#7fd3a3; --good-soft:#1f3a2b; --great:#8cc6ef; --great-soft:#1b3242;
+  --warn:#f0b75e; --warn-soft:#3b2d14; --bad:#f19a92; --bad-soft:#40211e; --gauge:#2a312e; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;margin:0}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:16px;padding-block:28px 64px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(22px,3.4vw,32px);line-height:1.15;margin:0;text-wrap:balance;letter-spacing:-.01em}
+.sub{color:var(--muted);margin-top:6px}
+.funnel{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px;align-items:stretch}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-width:0}
+.step b{display:block;font-family:var(--f-display);font-size:22px;font-weight:500;font-variant-numeric:tabular-nums}
+.step span{color:var(--muted);font-size:13px}
+.arrow{align-self:center;color:var(--muted)}
+.crit{margin-top:14px;color:var(--muted);font-size:13px}
+.crit em{font-style:normal;color:var(--ink)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:14px;margin-top:18px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.fld{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fld label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+input,select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px;min-width:0}
+input[type=search]{width:200px}
+input[type=number]{width:110px}
+input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chk{flex-direction:row;align-items:center;gap:8px;padding-bottom:8px}
+.chk label{font-size:14px;text-transform:none;letter-spacing:0;color:var(--ink)}
+.count{margin-left:auto;color:var(--muted);font-size:13px;padding-bottom:8px;font-variant-numeric:tabular-nums}
+.list{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.car{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px}
+.car h2{font-size:17px;font-weight:600;margin:0;line-height:1.3}
+.car h2 a{color:var(--ink);text-decoration:none}
+.car h2 a:hover{text-decoration:underline;text-decoration-color:var(--accent)}
+.meta{display:flex;flex-wrap:wrap;gap:4px 14px;color:var(--muted);font-size:13.5px;margin-top:6px;font-variant-numeric:tabular-nums}
+.meta b{color:var(--ink);font-weight:500}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{font-size:12px;padding:3px 8px;border-radius:999px;background:var(--warn-soft);color:var(--warn);white-space:nowrap}
+.chip.ok{background:var(--accent-soft);color:var(--accent)}
+.chip.bad{background:var(--bad-soft);color:var(--bad)}
+details{margin-top:10px;font-size:13.5px}
+summary{cursor:pointer;color:var(--accent);width:max-content}
+details p{margin:8px 0 0;max-width:68ch;color:var(--ink);white-space:pre-line}
+.price{display:flex;flex-direction:column;gap:8px;min-width:0}
+.ptop{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.pval{font-family:var(--f-display);font-size:22px;font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill{font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.pill.great{background:var(--great-soft);color:var(--great)}
+.pill.good{background:var(--good-soft);color:var(--good)}
+.gauge{position:relative;height:8px;border-radius:4px;background:var(--gauge);margin-top:14px}
+.gauge .mid{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--muted);left:50%;opacity:.6}
+.gauge .dot{position:absolute;top:50%;width:14px;height:14px;border-radius:50%;transform:translate(-50%,-50%);background:var(--accent);border:2px solid var(--surface)}
+.gl{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.delta{font-size:13.5px;font-variant-numeric:tabular-nums}
+.delta.below{color:var(--good)}
+.delta.above{color:var(--muted)}
+.links{display:flex;gap:14px;font-size:13px;flex-wrap:wrap}
+.links a{color:var(--accent)}
+.empty{padding:40px 0;color:var(--muted);text-align:center}
+.excl{margin-top:36px}
+.excl h3{font-family:var(--f-display);font-weight:500;font-size:16px;margin:0 0 10px}
+.excl ul{margin:0;padding-left:18px;color:var(--muted);font-size:14px;display:flex;flex-direction:column;gap:4px}
+.excl a{color:var(--ink)}
+.note{margin-top:28px;font-size:13.5px;color:var(--muted);max-width:75ch}
+@media (max-width:760px){.car{grid-template-columns:minmax(0,1fr)}input[type=search]{width:100%}.fld.grow{flex:1 1 100%}.count{margin-left:0}}
+@media (prefers-reduced-motion:no-preference){.car{transition:border-color .15s}.car:hover{border-color:var(--accent)}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Авто до миллиона</h1>
+    <div class="sub" id="sub"></div>
+    <div class="funnel" id="funnel"></div>
+    <div class="crit">Критерии: <em>с пробегом · автомат, вариатор или робот · до 1 000 000 ₽ · до 200 л.с. · до 3 владельцев по ПТС · не битый · частник · цена Авито «хорошая» или «отличная»</em>. Исключены машины из такси и каршеринга, не на ходу и под восстановление.</div>
+  </header>
+
+  <div class="bar" role="search">
+    <div class="fld grow"><label for="q">Поиск</label><input id="q" type="search" placeholder="марка, модель, город"></div>
+    <div class="fld"><label for="reg">Регион</label><select id="reg"></select></div>
+    <div class="fld"><label for="rate">Оценка Авито</label><select id="rate"><option value="">любая</option><option value="Отличная цена">отличная</option><option value="Хорошая цена">хорошая</option></select></div>
+    <div class="fld"><label for="ymin">Год от</label><input id="ymin" type="number" min="1980" max="2026" placeholder="2008"></div>
+    <div class="fld"><label for="kmax">Пробег до, км</label><input id="kmax" type="number" min="0" step="10000" placeholder="200000"></div>
+    <div class="fld"><label for="body">Кузов</label><select id="body"><option value="">любой</option></select></div>
+    <div class="fld"><label for="sort">Сортировка</label><select id="sort">
+      <option value="pct">выгода к рынку</option><option value="price">цена ↑</option><option value="year">год ↓</option><option value="km">пробег ↑</option><option value="new">новые объявления</option></select></div>
+    <div class="fld chk"><input id="clean" type="checkbox"><label for="clean">без замечаний</label></div>
+    <div class="count" id="count"></div>
+  </div>
+
+  <div class="list" id="list"></div>
+
+  <section class="excl" id="excl"></section>
+
+  <p class="note">«Выгода к рынку» считается от середины рыночного диапазона, который Авито показывает в объявлении. Отчёт Автотеки бесплатно не раскрывает ДТП, залоги, ограничения, скрутку пробега и работу в такси. Перед поездкой на осмотр купите отчёт по выбранной машине (от 115 ₽ на странице объявления) и проверьте эти пункты. Замечания на карточках взяты из текста продавца и требуют проверки.</p>
+</div>
+
+<script id="data" type="application/json">__DATA__</script>
+<script id="meta" type="application/json">__META__</script>
+<script>
+const ALL=JSON.parse(document.getElementById('data').textContent);
+const META=JSON.parse(document.getElementById('meta').textContent);
+const rub=n=>n==null?'—':n.toLocaleString('ru-RU')+' ₽';
+const num=n=>n==null?'—':n.toLocaleString('ru-RU');
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ok=ALL.filter(r=>!r.hard), bad=ALL.filter(r=>r.hard);
+const $=id=>document.getElementById(id);
+
+$('sub').textContent=`Обновлено ${META.updated} · регионы: ${META.regions.join(', ')}`;
+const great=ok.filter(r=>r.rating==='Отличная цена').length;
+const clean=ok.filter(r=>!r.flags.length).length;
+$('funnel').innerHTML=[
+  [META.found,'объявлений по фильтрам Авито'],
+  [ok.length,'подходят после проверки описаний'],
+  [clean,'без замечаний'],
+  [great,'с «отличной ценой»']
+].map(([v,l],i)=>(i?'<span class="arrow" aria-hidden="true">→</span>':'')+`<div class="step"><b>${num(v)}</b><span>${l}</span></div>`).join('');
+
+const regs=[...new Set(ok.map(r=>r.region))];
+$('reg').innerHTML='<option value="">все</option>'+regs.map(r=>`<option>${esc(r)}</option>`).join('');
+const bodies=[...new Set(ok.map(r=>r.body).filter(Boolean))].sort();
+$('body').innerHTML+=bodies.map(b=>`<option>${esc(b)}</option>`).join('');
+
+const ctrls=['q','reg','rate','ymin','kmax','body','sort','clean'];
+try{const s=JSON.parse(localStorage.getItem('avto-filters')||'{}');ctrls.forEach(k=>{if(s[k]!=null){const el=$(k); if(el.type==='checkbox') el.checked=s[k]; else el.value=s[k];}})}catch(e){}
+
+function gauge(r){
+  if(!r.mfrom||!r.mto) return '';
+  const span=r.mto-r.mfrom; let p=(r.price-r.mfrom)/span*100; p=Math.max(2,Math.min(98,p));
+  return `<div class="gauge" role="img" aria-label="Цена ${rub(r.price)} в рыночном диапазоне ${rub(r.mfrom)} – ${rub(r.mto)}"><span class="mid"></span><span class="dot" style="left:${p}%"></span></div>
+  <div class="gl"><span>${num(r.mfrom)}</span><span>рынок</span><span>${num(r.mto)}</span></div>`;
+}
+function card(r){
+  const below=r.delta>0;
+  const d=r.delta==null?'':`<div class="delta ${below?'below':'above'}">${below?'на '+num(r.delta)+' ₽ ниже':'на '+num(-r.delta)+' ₽ выше'} середины рынка (${below?'−':'+'}${Math.abs(r.pct)}%)</div>`;
+  const chips=r.flags.length?r.flags.map(f=>`<span class="chip ${/такси|состояние|неисправ/.test(f)?'bad':''}">${esc(f)}</span>`).join(''):'<span class="chip ok">в описании замечаний нет</span>';
+  const meta=[
+    r.year&&`<span><b>${r.year}</b> г.</span>`, r.km!=null&&`<span><b>${num(r.km)}</b> км</span>`, r.hp&&`<span><b>${r.hp}</b> л.с.</span>`,
+    r.box&&`<span>${esc(r.box)}</span>`, r.body&&`<span>${esc(r.body)}</span>`, r.drive&&`<span>${esc(r.drive)} привод</span>`, r.fuel&&`<span>${esc(r.fuel)}</span>`,
+    `<span>${esc(r.city||r.region)}</span>`, r.date&&`<span>размещено ${esc(r.date)}</span>`].filter(Boolean).join('');
+  return `<article class="car">
+    <div style="min-width:0">
+      <h2><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title)}</a></h2>
+      <div class="meta">${meta}</div>
+      <div class="chips">${chips}</div>
+      ${r.desc?`<details><summary>Описание продавца</summary><p>${esc(r.desc)}${r.desc.length>=700?'…':''}</p></details>`:''}
+    </div>
+    <div class="price">
+      <div class="ptop"><span class="pval">${rub(r.price)}</span><span class="pill ${r.rating==='Отличная цена'?'great':'good'}">${esc((r.rating||'').toLowerCase())}</span></div>
+      ${d}${gauge(r)}
+      <div class="links"><a href="${esc(r.url)}" target="_blank" rel="noopener">Открыть на Авито</a><span style="color:var(--muted)">Автотека: проверить</span></div>
+    </div></article>`;
+}
+function render(){
+  const v=Object.fromEntries(ctrls.map(k=>{const el=$(k);return [k,el.type==='checkbox'?el.checked:el.value]}));
+  try{localStorage.setItem('avto-filters',JSON.stringify(v))}catch(e){}
+  const q=v.q.trim().toLowerCase();
+  let rows=ok.filter(r=>(!q||(r.title+' '+r.city).toLowerCase().includes(q))&&(!v.reg||r.region===v.reg)&&(!v.rate||r.rating===v.rate)
+    &&(!v.ymin||(r.year||0)>=+v.ymin)&&(!v.kmax||(r.km??1e9)<=+v.kmax)&&(!v.body||r.body===v.body)&&(!v.clean||!r.flags.length));
+  const s={pct:(a,b)=>(b.pct??-1e9)-(a.pct??-1e9),price:(a,b)=>a.price-b.price,year:(a,b)=>(b.year||0)-(a.year||0)||(a.km||0)-(b.km||0),km:(a,b)=>(a.km??1e9)-(b.km??1e9),new:(a,b)=>Number(b.id)-Number(a.id)}[v.sort];
+  rows.sort(s);
+  $('count').textContent=`Показано ${num(rows.length)} из ${num(ok.length)}`;
+  $('list').innerHTML=rows.length?rows.map(card).join(''):'<div class="empty">Под эти фильтры машин нет. Ослабьте условия: год, пробег или кузов.</div>';
+}
+ctrls.forEach(k=>$(k).addEventListener('input',render));
+render();
+$('excl').innerHTML=bad.length?`<h3>Исключены после проверки описания: ${bad.length}</h3><ul>${bad.map(r=>`<li><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title)}</a>, ${rub(r.price)}: ${esc(r.flags.join(', '))}</li>`).join('')}</ul>`:'';
+</script>
